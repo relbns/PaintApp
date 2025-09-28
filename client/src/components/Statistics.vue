@@ -22,3 +22,10 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+#statistics span {
+  display: inline-block;
+  margin-left: 20px;
+}
+</style>

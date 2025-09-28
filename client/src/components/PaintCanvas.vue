@@ -11,6 +11,8 @@
 </template>
 
 <script>
+import imageService from "../services/imageService";
+
 export default {
   name: "PaintCanvas",
   data() {
@@ -33,6 +35,7 @@ export default {
     brushSize: Number,
     showImageOnCanvasWatcher: String,
     saveImageWatcher: Boolean,
+    downloadImageWatcher: Boolean,
   },
   methods: {
     updateMousePosition(event) {
@@ -108,41 +111,65 @@ export default {
         };
       }
     },
-    saveImage() {
-      // Option to choose file name
-      //const fileName = prompt("Enter file name for your image");
+    async saveImage() {
       const canvasDataURL = this.canvas.toDataURL();
-      const a = document.createElement("a");
-      a.href = canvasDataURL;
-      a.download = "myDrawing"; //fileName || "myDrawing";
-      a.click();
+
+      // save using the service
+      await imageService.saveImage(canvasDataURL);
+
+      // update list in LeftImages Component
       const payload = JSON.stringify({
         image: { src: canvasDataURL },
       });
-      // send to server
-      this.sendToServer(payload);
-      // update list in LeftImages Component
       this.$emit("update-image-list", payload);
 
       // clear canvas for next painting
       this.clearCanvas();
     },
+    downloadCanvasAsImage() {
+      const tempCanvas = document.createElement("canvas");
+      const tempCtx = tempCanvas.getContext("2d");
+      tempCanvas.width = this.canvasWidth;
+      tempCanvas.height = this.canvasHeight;
+
+      const download = (canvasToDownload) => {
+        const canvasDataURL = canvasToDownload.toDataURL("image/png");
+        const a = document.createElement("a");
+        a.href = canvasDataURL;
+        a.download = "myDrawing.png";
+        a.click();
+      };
+
+      if (this.backgroundImage) {
+        const background = new Image();
+        background.crossOrigin = "anonymous";
+        background.src = this.backgroundImage;
+        background.onload = () => {
+          const imageRatio = background.width / background.height;
+          let newWidth = tempCanvas.width;
+          let newHeight = newWidth / imageRatio;
+          if (newHeight > tempCanvas.height) {
+            newHeight = tempCanvas.height;
+            newWidth = newHeight * imageRatio;
+          }
+          tempCtx.drawImage(background, 0, 0, newWidth, newHeight);
+          tempCtx.drawImage(this.canvas, 0, 0);
+          download(tempCanvas);
+        };
+        background.onerror = () => {
+          download(this.canvas);
+        };
+      } else {
+        tempCtx.fillStyle = this.backgroundColor || "#ffffff";
+        tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+        tempCtx.drawImage(this.canvas, 0, 0);
+        download(tempCanvas);
+      }
+    },
     showSelectedOnCanvas(image) {
       this.clearCanvas();
       this.backgroundImage = image;
       this.canvas.style.backgroundImage = `url('${this.backgroundImage}')`;
-    },
-    async sendToServer(payload) {
-      const res = await fetch("http://localhost:3000/images", {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: payload,
-      });
-      const data = await res.json();
-      return data;
     },
   },
   watch: {
@@ -161,6 +188,11 @@ export default {
     },
     saveImageWatcher: function () {
       this.prepareForSave();
+    },
+    downloadImageWatcher: function (shouldDownload) {
+      if (shouldDownload) {
+        this.downloadCanvasAsImage();
+      }
     },
   },
   mounted() {
@@ -197,3 +229,14 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+#paintCanvas {
+  width: 600px;
+  height: 400px;
+  border: 1px solid #ccc;
+  cursor: crosshair;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+}
+</style>

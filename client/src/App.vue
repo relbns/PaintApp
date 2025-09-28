@@ -1,32 +1,38 @@
 <template>
   <div id="wrapper">
-    <h1>Paint 2.0</h1>
-    <Toolbar
-      @change-brush-color="updateBrushColor"
-      @change-brush-size="updateBrushSize"
-      @change-background-color="updateBgColor"
-      @change-background-image="updateBgImage"
-      @clear-canvas="clearCanvas"
-      :bgImageNameWatcher="bgFileName"
-    />
-    <PaintCanvas
-      @mouse-pos="updateMousePos"
-      @clear-bg-filename="clearBGfileName"
-      @update-image-list="updateImageList"
-      :clearCanvasWatcher="isCanvasClear"
-      :imageBgWatcher="bgImage"
-      :colorBgWatcher="bgColor"
-      :brushSize="brushSize"
-      :brushColor="brushColor"
-      :saveImageWatcher="saveImage"
-      :showImageOnCanvasWatcher="showImage"
-    />
-    <Statistics :pos="pos" :brushSize="brushSize" :brushColor="brushColor" />
-    <LeftImages
-      @save-image="saveImageTask"
-      @show-on-canvas="showImageTask"
-      :savedImageWatcher="savedImage"
-    />
+    <main>
+      <h1>Paint 2.0</h1>
+      <Toolbar
+        @change-brush-color="updateBrushColor"
+        @change-brush-size="updateBrushSize"
+        @change-background-color="updateBgColor"
+        @change-background-image="updateBgImage"
+        @clear-canvas="clearCanvas"
+        @download-image="downloadImageTask"
+        :bgImageNameWatcher="bgFileName"
+      />
+      <PaintCanvas
+        @mouse-pos="updateMousePos"
+        @clear-bg-filename="clearBGfileName"
+        @update-image-list="updateImageList"
+        :clearCanvasWatcher="isCanvasClear"
+        :imageBgWatcher="bgImage"
+        :colorBgWatcher="bgColor"
+        :brushSize="brushSize"
+        :brushColor="brushColor"
+        :saveImageWatcher="saveImage"
+        :downloadImageWatcher="downloadImage"
+        :showImageOnCanvasWatcher="showImage"
+      />
+      <Statistics :pos="pos" :brushSize="brushSize" :brushColor="brushColor" />
+    </main>
+    <aside>
+      <LeftImages
+        @save-image="saveImageTask"
+        @show-on-canvas="showImageTask"
+        :savedImageWatcher="savedImage"
+      />
+    </aside>
   </div>
 </template>
 
@@ -55,6 +61,7 @@ export default {
       isCanvasClear: false,
       bgFileName: false,
       saveImage: false,
+      downloadImage: false,
       savedImage: "",
     };
   },
@@ -83,6 +90,12 @@ export default {
     saveImageTask() {
       this.saveImage = !this.saveImage;
     },
+    downloadImageTask() {
+      this.downloadImage = !this.downloadImage;
+      setTimeout(() => {
+        this.downloadImage = !this.downloadImage;
+      }, 100);
+    },
     showImageTask(image) {
       this.showImage = image;
     },
@@ -95,41 +108,23 @@ export default {
 
 <style>
 #wrapper {
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+  padding: 20px;
   font-family: Avenir, Helvetica, Arial, sans-serif;
   color: #2c3e50;
+  align-items: flex-start;
 }
 
-#leftImages {
-  width: 200px;
-  height: 600px;
-  position: absolute;
-  right: 20px;
-  top: 100px;
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
 }
 
-#leftImages #imagesList {
-  margin-top: 20px;
-  height: 400px;
-  overflow: auto;
-}
-
-#leftImages img {
-  width: 100px;
-  border: gainsboro dashed 2px;
-  padding: 5px;
-  cursor: pointer;
-}
-
-#paintCanvas {
-  width: 600px;
-  height: 400px;
-  border: dashed dimgray 3px;
-  cursor: crosshair;
-}
-
-#statistics span {
-  display: inline-block;
-  margin-left: 20px;
+aside {
+  margin-top: 50px;
 }
 </style>
