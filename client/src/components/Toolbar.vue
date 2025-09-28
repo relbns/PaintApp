@@ -28,6 +28,9 @@
     <div>
       <label for="fileLoadBtn">Load image </label>
       <input id="fileLoadBtn" type="file" @change="getBackgroundImage" />
+      <button id="downloadBtn" @click="$emit('download-image')">
+        Download
+      </button>
       <button id="clearBtn" @click="$emit('clear-canvas')">Clear</button>
     </div>
   </div>
@@ -61,3 +64,73 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+#toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+#toolbar > div {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+label {
+  font-weight: bold;
+}
+
+input[type="range"] {
+  width: 150px;
+}
+
+input[type="color"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 30px;
+  height: 30px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
+input[type="color"]::-webkit-color-swatch {
+  border-radius: 50%;
+  border: 1px solid #ccc;
+}
+input[type="color"]::-moz-color-swatch {
+  border-radius: 50%;
+  border: 1px solid #ccc;
+}
+
+button {
+  padding: 8px 12px;
+  border: none;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#clearBtn {
+  background-color: #f44336;
+}
+
+#clearBtn:hover {
+  background-color: #da190b;
+}
+
+#downloadBtn {
+  background-color: #2196f3;
+}
+
+#downloadBtn:hover {
+  background-color: #0b7dda;
+}
+</style>
